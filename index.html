@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>AI Resume Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --background-h: 222; --background-s: 47%; --background-l: 11%;
+  --foreground-h: 210; --foreground-s: 40%; --foreground-l: 98%;
+  --primary-h: 217; --primary-s: 91%; --primary-l: 60%;
+  --accent-h: 45; --accent-s: 93%; --accent-l: 47%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, hsl(var(--background-h), var(--background-s), var(--background-l)) 0%, #1e2330 100%);
+  font-family: 'Inter', sans-serif;
+  color: hsl(var(--foreground-h), var(--foreground-s), var(--foreground-l));
+  position: relative;
+  overflow-x: hidden;
+}
+.hero-section {
+  min-height: 100vh;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+.particles-bg-canvas {
+  position: fixed;
+  top:0; left:0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 64px 16px 32px 16px; max-width: 1200px; margin: 0 auto; position: relative;
+  z-index: 1;
+}
+@media (min-width: 800px) {
+  .hero-container {
+    flex-direction: row; justify-content: space-between; align-items: center;
+    min-height: 80vh;
+    padding-top: 48px; padding-bottom: 36px;
+  }
+}
+
+.hero-content { max-width: 450px; margin: 0 auto; }
+@media (min-width: 800px) { .hero-content { margin:0; } }
+
+.glass-pill {
+  display: inline-flex; align-items: center; padding: 7px 22px;
+  border-radius: 30px; background: rgba(255,255,255,0.08);
+  box-shadow: 0 4px 18px 0 rgba(37,99,235,0.15);
+  font-size: 1.07rem; font-weight: 600; margin-bottom: 24px;
+  backdrop-filter: blur(10px) saturate(180%);
+  color: #fff; gap: 10px; letter-spacing: 0.01em;
+}
+.pill-icon { color: #facc15; font-size: 1.2em; }
+
+.hero-headline {
+  font-family: 'Poppins', sans-serif; font-size: 2.7rem; font-weight: 800;
+  line-height: 1.2; margin-bottom: 0; color: #f8fafc;
+  text-shadow: 0 2px 12px rgba(37,99,235,0.10);
+}
+.headline-gradient {
+  background: linear-gradient(90deg, hsl(var(--primary-h), var(--primary-s), var(--primary-l)) 40%, hsl(var(--accent-h), var(--accent-s), var(--accent-l)) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; color: transparent;
+  font-weight: 800;
+}
+
+.hero-desc {
+  font-family: 'Inter',sans-serif; font-size: 1.09rem; color: #cbd5e1;
+  margin: 26px 0 32px 0; text-align:left; max-width: 380px;
+  letter-spacing: 0.01em; line-height: 1.45;
+}
+
+.hero-actions {
+  display: flex; gap: 16px; margin-bottom: 18px; flex-wrap:wrap;
+}
+.hero-btn-primary, .hero-btn-secondary {
+  display: inline-block; padding: 14px 32px;
+  border-radius: 10px; font-size: 1.05rem;
+  font-weight: 600; transition: all .18s;
+  box-shadow: 0 6px 24px 3px rgba(37,99,235,0.12);
+}
+.hero-btn-primary {
+  background: linear-gradient(90deg, #2563eb 80%, #3b82f6 101%);
+  color: #fff; border: none; letter-spacing: 0.01em;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.27);
+}
+.hero-btn-primary:hover { box-shadow: 0 0 28px #2563eb44; transform: scale(1.08); }
+.hero-btn-secondary {
+  background: rgba(25,27,34,0.6);
+  color: #fff; border: 1.5px solid #253050;
+}
+.hero-btn-secondary:hover { background: rgba(25,27,34,0.78); box-shadow: 0 0 28px #343a4044; transform: scale(1.05); }
+.hero-mockup-container { margin-top:36px; margin-bottom:20px; text-align:center;}
+@media (min-width: 800px) { .hero-mockup-container { margin:0; } }
+.hero-mockup-img {
+  width: 400px; height: auto; border-radius: 22px;
+  box-shadow: 0 16px 44px 0 #13448e32, 0 4px 24px 0 #265beb44;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Floating effect */
+@keyframes float {
+  0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px);}
+}
+  </style>
+</head>
+<body>
+<!-- Particles Canvas Background -->
+nvas id="particles-bg" class="particlesles-bg-canvas"></canvas>
+
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="glass-pill">
+        <span class="pill-icon">&#9889;</span>
+        <span>AI-Powered Resume Builder</span>
+      </div>
+      <h1 class="hero-headline font-poppins">
+        Your Dream Job<br>
+        <span class="headline-gradient">Starts Here</span>
+      </h1>
+      <p class="hero-desc">
+        AI-powered resumes for electricians, drivers, plumbers, and skilled workers — in 5 minutes
+      </p>
+      <div class="hero-actions">
+        <a href="#" class="hero-btn-primary">Create Resume Free</a>
+        <a href="#" class="hero-btn-secondary">View Templates</a>
+      </div>
+    </div>
+    <div class="hero-mockup-container">
+      <img src="hero-mockup.png" alt="Resume Mockup" class="hero-mockup-img"/>
+    </div>
+  </div>
+</section>
+
+<script>
+// --- Simple particles animation for hero background ---
+const canvas = document.getElementById('particles-bg');
+const ctx = canvas.getContext('2d');
+let width, height, particles = [];
+
+function resizeCanvas() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function initParticles() {
+  particles = [];
+  const count = width > 600 ? 50 : 24;
+  for(let i=0; iount; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Mathth.random()*(width>600?2.5:1.8)+1.4,
+      speed: 0.12 + Math.random() * 0.18,
+      angle: Math.random() * 2 * Math.PI,
+      opacity: Math.random()*0.27 + 0.03
+    });
+  }
+}
+initParticles();
+window.addEventListener('resize', initParticles);
+
+function drawParticles() {
+  ctx.clearRect(0,0,width,height);
+  for(const p of particles) {
+    p.x += Math.cos(p.angle) * p.speed;
+    p.y += Math.sin(p.angle) * p.speed * 0.37;
+    if(p.x < -10) p.x = width+10;
+    if(p.x > width+10) p.x = -10;
+    if(p.y < -10) p.y = height+10;
+    if(p.y > height+10) p.y = -10;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
+    ctx.fillStyle = `rgba(255,255,255,${p.opacity})`;
+    ctx.shadowColor = "#3b82f6";
+    ctx.shadowBlur = 8 * p.opacity;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+</script>
+</body>
+</html>
