@@ -19,7 +19,18 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "enableEdgeToEdge": false,
+      "navigationBar": {
+        "backgroundColor": "#000000",
+        "barStyle": "light-content"
+      },
+      "package": "com.anonymous.Reume_Builder"
+    },
+    "statusBar": {
+      "backgroundColor": "#000000",
+      "barStyle": "light-content",
+      "translucent": false
     },
     "web": {
       "output": "static",

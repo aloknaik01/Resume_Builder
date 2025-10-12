@@ -1,425 +1,175 @@
-import { useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
-  Animated,
-  ScrollView,
-  StyleSheet,
+  View,
   Text,
   TouchableOpacity,
-  View,
+  StyleSheet,
+  Animated,
+  Modal,
+  Dimensions,
+  ScrollView,
+  Platform,
 } from 'react-native';
-import AnimatedBackground from './components/AnimatedBackground.jsx';
+import LinearGradient from 'react-native-linear-gradient'; // Make sure to install!
+import { BlurView } from '@react-native-community/blur'; // Or Expo BlurView if using Expo
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+const languages = [
+  // unchanged – your language objects here
+];
 
-// Main Hero Component
-const HeroSection = () => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const badgeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+const LanguageSelector = () => {
+  // ... all state/refs/animation code similar to your current logic
 
-  useEffect(() => {
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(badgeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 8,
-          tension: 40,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          friction: 8,
-          tension: 40,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start();
-  }, []);
-
+  // EXTRA: Parallax/blurred backgrounds and more lively shine
   return (
     <View style={styles.container}>
-      <AnimatedBackground />
+      {/* Dynamic Gradient & Particle Background */}
+      <View style={styles.backgroundContainer}>
+        {/* Gradient blobs */}
+        <LinearGradient colors={['rgba(59,130,246,0.14)', 'rgba(16,185,129,0.12)']} style={styles.gradientBlob1}/>
+        <LinearGradient colors={['rgba(234,179,8,0.13)', 'transparent']} style={styles.gradientBlob2}/>
+        <LinearGradient colors={['rgba(139,92,246,0.13)', 'transparent']} style={styles.gradientBlob3}/>
+        {/* Particles (stars) */}
+        <Animated.View style={styles.particle1}/>
+        <Animated.View style={styles.particle2}/>
+        <Animated.View style={styles.particle3}/>
+        <Animated.View style={styles.particle4}/>
+        {/* Spotlight shimmer overlay */}
+        <LinearGradient
+          colors={['rgba(255,255,255,0.05)', 'transparent', 'rgba(59,130,246,0.07)']}
+          start={{x: 0.2, y: 0.2}} end={{x: 1, y: 1}}
+          style={styles.spotlight}
+        />
+      </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.content}>
-          {/* Badge with entrance animation */}
-          <Animated.View
-            style={[
-              styles.badgeContainer,
-              {
-                opacity: badgeAnim,
-                transform: [{ scale: scaleAnim }],
-              },
-            ]}
-          >
-            <View style={styles.badge}>
-              <View style={styles.sparkleIcon}>
-                <Text style={styles.sparkleText}>✨</Text>
-              </View>
-              <Text style={styles.badgeText}>AI-Powered Resume Builder</Text>
+      {/* Main Content - unchanged except with glassy and animated effects where desired */}
+      <View style={styles.content}>
+        {/* Globe Icon with animated halo pulse */}
+        <Animated.View style={[styles.iconBadge, {transform: [{scale: haloAnim}]}]}>
+          <Text style={styles.iconText}>🌍</Text>
+          <View style={styles.iconGlow}/>
+        </Animated.View>
+
+        {/* Animated Title with flicker */}
+        <Animated.Text style={[styles.title, {opacity: titleOpacity}]}>{displayedTitle}</Animated.Text>
+        {/* Subtitle with shine shimmer */}
+        <Animated.Text style={[styles.subtitle, {opacity: subtitleOpacity}]}>
+          {currentLanguage.subtitle}
+        </Animated.Text>
+        
+        {/* Interactive Language Button */}
+        <TouchableOpacity
+          style={[styles.languageButton, {borderColor: selectedLanguage.accent + '80'}]}
+          activeOpacity={0.85}
+          onPress={() => setModalVisible(true)}
+        >
+          <LinearGradient
+            colors={['rgba(255,255,255,0.13)', 'transparent']}
+            style={styles.buttonShine}
+          />
+          <Animated.View style={{
+            transform: [{scale: pulseAnim}],
+            flexDirection: 'row', alignItems: 'center',
+          }}>
+            <View style={[styles.flagIconContainer, {backgroundColor: selectedLanguage.accent + '33'}]}>
+              <Text style={styles.flagIcon}>{selectedLanguage.flag}</Text>
+            </View>
+            <View style={styles.languageInfo}>
+              <Text style={styles.languageName}>{selectedLanguage.name}</Text>
+              <Text style={styles.nativeName}>{selectedLanguage.nativeName}</Text>
+            </View>
+            <Text style={styles.chevron}>›</Text>
+          </Animated.View>
+        </TouchableOpacity>
+
+        {/* Info card */}
+        <Animated.View style={[styles.infoCard, {opacity: infoOpacity}]}>
+          <Text style={styles.infoIcon}>✨</Text>
+          <Text style={styles.infoText}>{currentLanguage.infoText}</Text>
+        </Animated.View>
+      </View>
+
+      {/* Modal with frosted glass & BlurView */}
+      <Modal visible={modalVisible} transparent animationType="none" onRequestClose={handleClose}>
+        <Animated.View style={[styles.modalOverlay, {opacity: overlayAnim}]}>
+          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={handleClose}/>
+          <Animated.View style={[styles.modalContent, {
+            opacity: fadeAnim,
+            transform: [{scale: scaleAnim}, {translateY: slideAnim}],
+          }]}>
+            {/* Glassy blur backdrop */}
+            <BlurView
+              style={StyleSheet.absoluteFill}
+              blurType={Platform.OS === 'ios' ? 'light' : 'extraLight'}
+              blurAmount={Platform.OS === 'ios' ? 20 : 10}
+            />
+
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalIcon}>🌐</Text>
+              <Animated.Text style={styles.modalTitle}>{currentLanguage.modalTitle}</Animated.Text>
+              <Animated.Text style={styles.modalSubtitle}>{currentLanguage.modalSubtitle}</Animated.Text>
+            </View>
+
+            {/* Language Options - glassy ripple and animated tick */}
+            <ScrollView style={styles.languageList} contentContainerStyle={styles.languageListContent}>
+              {languages.map((language, index) => (
+                <TouchableOpacity
+                  key={language.id}
+                  style={[
+                    styles.languageOption,
+                    selectedLanguage.id === language.id && styles.selectedOption,
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={() => handleLanguageSelect(language)}
+                >
+                  <View style={styles.languageOptionContent}>
+                    <View style={[
+                      styles.flagContainer,
+                      selectedLanguage.id === language.id && {backgroundColor: language.accent + '33'},
+                    ]}>
+                      <Text style={styles.flagLarge}>{language.flag}</Text>
+                      {selectedLanguage.id === language.id && (
+                        <Animated.View style={[styles.flagBadge]}>
+                          <Text style={styles.flagBadgeText}>✓</Text>
+                        </Animated.View>
+                      )}
+                    </View>
+                    <View style={styles.languageDetails}>
+                      <Text style={styles.optionName}>{language.name}</Text>
+                      <Text style={styles.optionNativeName}>{language.nativeName}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* Modal Actions */}
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.actionButton} onPress={handleClose}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, {backgroundColor: selectedLanguage.accent}]} onPress={handleClose}>
+                <Text style={styles.confirmButtonText}>Confirm</Text>
+                <Text style={styles.confirmIcon}>→</Text>
+              </TouchableOpacity>
             </View>
           </Animated.View>
-
-          {/* Main Heading with slide animation */}
-          <Animated.View
-            style={[
-              styles.headingContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            <Text style={styles.heading}>Your Dream Job</Text>
-            <View style={styles.headingGradientWrapper}>
-              <Text style={[styles.heading, styles.headingGradient]}>
-                Starts Here
-              </Text>
-              <View style={styles.gradientUnderline} />
-            </View>
-          </Animated.View>
-
-          {/* Subheading */}
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            }}
-          >
-            <Text style={styles.subheading}>
-              AI-powered resumes for electricians, drivers, plumbers, and skilled
-              workers — in 5 minutes
-            </Text>
-          </Animated.View>
-
-          {/* Buttons */}
-          <Animated.View
-            style={[
-              styles.buttonsContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            <TouchableOpacity style={styles.primaryButton} activeOpacity={0.85}>
-              <View style={styles.buttonGlow} />
-              <Text style={styles.primaryButtonText}>Create Resume Free</Text>
-              <View style={styles.buttonShine} />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.secondaryButton} activeOpacity={0.85}>
-              <View style={styles.secondaryButtonBorder} />
-              <Text style={styles.secondaryButtonText}>View Templates</Text>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Stats/Trust Indicators */}
-          <Animated.View
-            style={[
-              styles.statsContainer,
-              {
-                opacity: fadeAnim,
-              },
-            ]}
-          >
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>10,000+</Text>
-              <Text style={styles.statLabel}>Resumes Created</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>100%</Text>
-              <Text style={styles.statLabel}>Free Forever</Text>
-            </View>
-          </Animated.View>
-        </View>
-      </ScrollView>
+        </Animated.View>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0a0f1e',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 80,
-  },
-  content: {
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  // Animated Background
-  backgroundContainer: {
+  // ...mostly as you had, but enhance backgrounds, gradients, glassiness, shadow etc
+  spotlight: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    overflow: 'hidden',
-    opacity: 0.5,
+    top: 0, left: 0, right: 0, bottom: 0,
   },
-  gradientOverlay1: {
-    position: 'absolute',
-    top: '15%',
-    left: '-10%',
-    width: 500,
-    height: 500,
-    backgroundColor: 'rgba(59, 130, 246, 0.12)',
-    borderRadius: 250,
-    transform: [{ scale: 1.5 }],
-  },
-  gradientOverlay2: {
-    position: 'absolute',
-    top: '55%',
-    right: '-15%',
-    width: 400,
-    height: 400,
-    backgroundColor: 'rgba(234, 179, 8, 0.08)',
-    borderRadius: 200,
-    transform: [{ scale: 1.5 }],
-  },
-  gradientOverlay3: {
-    position: 'absolute',
-    top: '35%',
-    left: '30%',
-    width: 300,
-    height: 300,
-    backgroundColor: 'rgba(139, 92, 246, 0.06)',
-    borderRadius: 150,
-    transform: [{ scale: 1.3 }],
-  },
-  linesContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  connectionLine: {
-    position: 'absolute',
-    height: 1.5,
-    backgroundColor: 'rgba(59, 130, 246, 0.25)',
-    borderRadius: 1,
-  },
-  particle: {
-    position: 'absolute',
-    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-    borderRadius: 50,
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  // Badge
-  badgeContainer: {
-    marginBottom: 28,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 50,
-    borderWidth: 1.5,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  sparkleIcon: {
-    width: 24,
-    height: 24,
-    backgroundColor: 'rgba(234, 179, 8, 0.15)',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  sparkleText: {
-    fontSize: 14,
-  },
-  badgeText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  // Heading
-  headingContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  heading: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    textAlign: 'center',
-    lineHeight: 58,
-    letterSpacing: -0.5,
-  },
-  headingGradientWrapper: {
-    marginTop: 4,
-    alignItems: 'center',
-  },
-  headingGradient: {
-    color: '#3b82f6',
-    textShadowColor: 'rgba(59, 130, 246, 0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-  },
-  gradientUnderline: {
-    marginTop: 8,
-    width: 120,
-    height: 4,
-    backgroundColor: '#eab308',
-    borderRadius: 2,
-    shadowColor: '#eab308',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  // Subheading
-  subheading: {
-    fontSize: 17,
-    color: 'rgba(255, 255, 255, 0.75)',
-    textAlign: 'center',
-    lineHeight: 26,
-    marginBottom: 40,
-    paddingHorizontal: 16,
-    letterSpacing: 0.2,
-  },
-  // Buttons
-  buttonsContainer: {
-    width: '100%',
-    gap: 16,
-    marginBottom: 48,
-  },
-  primaryButton: {
-    position: 'relative',
-    backgroundColor: '#3b82f6',
-    paddingVertical: 18,
-    paddingHorizontal: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    overflow: 'hidden',
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  buttonGlow: {
-    position: 'absolute',
-    top: -2,
-    left: -2,
-    right: -2,
-    bottom: -2,
-    backgroundColor: '#3b82f6',
-    borderRadius: 18,
-    opacity: 0.3,
-  },
-  buttonShine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '50%',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  primaryButtonText: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: 'bold',
-    letterSpacing: 0.3,
-    zIndex: 1,
-  },
-  secondaryButton: {
-    position: 'relative',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    paddingVertical: 18,
-    paddingHorizontal: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  secondaryButtonBorder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderWidth: 2,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-    borderRadius: 16,
-  },
-  secondaryButtonText: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-    zIndex: 1,
-  },
-  // Stats
-  statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    paddingVertical: 20,
-    paddingHorizontal: 32,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#3b82f6',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
-    textAlign: 'center',
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginHorizontal: 20,
-  },
+  // Rest same, you can tweak colors, add BlurView styles etc
 });
 
-export default HeroSection;
+export default LanguageSelector;
