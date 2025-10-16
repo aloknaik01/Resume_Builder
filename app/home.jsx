@@ -9,6 +9,8 @@ import {
   View,
 } from 'react-native';
 import AnimatedBackground from './components/AnimatedBackground';
+import Testimonials from './components/Testimonials';
+import WhyChooseSection from './components/WhyChooseSection';
 import useLanguageStore from './store/languageStore';
 
 const HomeScreen = () => {
@@ -55,10 +57,7 @@ const HomeScreen = () => {
     router.push('/build');
   };
 
-  // const handleViewTemplates = () => {
-  //   // Navigate to templates screen (to be created)
-  //   alert('Templates coming soon!');
-  // };
+
 
   const handleViewTemplates = () => router.push('/templateView');
 
@@ -169,6 +168,8 @@ const HomeScreen = () => {
             </View>
           </Animated.View>
         </View>
+        <WhyChooseSection />
+        <Testimonials />
       </ScrollView>
     </View>
   );

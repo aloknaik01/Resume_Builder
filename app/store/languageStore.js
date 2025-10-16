@@ -1,5 +1,5 @@
-import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { create } from 'zustand';
 import { LANGUAGES } from '../constants/languages.js';
 
 const STORAGE_KEY = '@app_language';
@@ -11,7 +11,7 @@ const useLanguageStore = create((set, get) => ({
   isLanguageConfirmed: false,
   isLoading: true,
 
-  // ✅ Confirm language
+  // Confirm language
   confirmLanguage: async () => {
     const { tempSelectedLanguage } = get();
     if (tempSelectedLanguage) {
@@ -23,21 +23,21 @@ const useLanguageStore = create((set, get) => ({
     }
   },
 
-  // ✅ Temporarily select language
+  // Temporarily select language
   setTempLanguage: (language) => {
     set({ tempSelectedLanguage: language });
   },
 
-  // ✅ Cancel selection
+  // Cancel selection
   cancelSelection: () => {
     const { selectedLanguage } = get();
     set({ tempSelectedLanguage: selectedLanguage });
   },
 
-  // ✅ Update index for animation
+  //  Update index for animation
   setCycleIndex: (index) => set({ currentCycleIndex: index }),
 
-  // ✅ Get current cycle language (safe)
+  // Get current cycle language (safe)
   getCurrentCycleLanguage: () => {
     try {
       const { currentCycleIndex } = get();
@@ -49,7 +49,7 @@ const useLanguageStore = create((set, get) => ({
     }
   },
 
-  // ✅ Load language from AsyncStorage
+  // Load language from AsyncStorage
   loadLanguage: async () => {
     try {
       const savedLangId = await AsyncStorage.getItem(STORAGE_KEY);
@@ -78,10 +78,10 @@ const useLanguageStore = create((set, get) => ({
     }
   },
 
-  // ✅ Get all languages
+  // Get all languages
   getAllLanguages: () => LANGUAGES || [],
 
-  // ✅ Get translations for selected language
+  //  Get translations for selected language
   getTranslations: () => {
     const { selectedLanguage } = get();
     return selectedLanguage?.translations || LANGUAGES?.[0]?.translations || {};
