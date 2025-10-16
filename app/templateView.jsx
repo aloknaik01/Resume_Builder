@@ -1,128 +1,323 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Animated,
+  Dimensions,
+  Image,
+} from 'react-native';
 import { router } from 'expo-router';
-import AnimatedBackground from './components/AnimatedBackground.jsx';
-import useLanguageStore from './store/languageStore.js';
+import AnimatedBackground from './components/AnimatedBackground';
+import useLanguageStore from './store/languageStore';
+import img from '../assets/images/icon.png';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const templatesList = [
+  {
+    key: 'classic',
+    title: 'Classic Resume',
+    subtitle: 'Clean, professional',
+    accent: '#3b82f6',
+    thumb: img,
+  },
+  {
+    key: 'modern',
+    title: 'Modern Resume',
+    subtitle: 'Bold & contemporary',
+    accent: '#8b5cf6',
+    thumb: img,
+  },
+  {
+    key: 'elegant',
+    title: 'Elegant Resume',
+    subtitle: 'Minimal and refined',
+    accent: '#f59e0b',
+    thumb: img,
+  },
+  {
+    key: 'creative',
+    title: 'Creative Resume',
+    subtitle: 'Colorful & unique',
+    accent: '#10b981',
+    thumb: img,
+  },
+];
 
 const TemplateView = () => {
-  const { selectedLanguage } = useLanguageStore();
-  const language = selectedLanguage?.translations || {};
+  const { selectedLanguage, getTranslations } = useLanguageStore();
+  const t = getTranslations();
+  const heading = t?.viewTemplates || t?.title || 'Choose Template';
+  const subheading = t?.chooseTemplateSubtext || 'Pick a template to start building';
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const fade = useRef(new Animated.Value(0)).current;
+  const rise = useRef(new Animated.Value(12)).current;
+  const cardScale = useRef(new Animated.Value(0.98)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, friction: 8 }),
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fade, {
+          toValue: 1,
+          duration: 650,
+          useNativeDriver: true,
+        }),
+        Animated.spring(rise, {
+          toValue: 0,
+          friction: 10,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.spring(cardScale, {
+        toValue: 1,
+        friction: 7,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
-  const handleStartBuilding = () => {
-    router.push('/build');
+  const handleUseTemplate = (key) => {
+    router.push(`/build?template=${encodeURIComponent(key)}`);
   };
 
-  const templates = [
-    { id: 1, title: 'Classic Resume', color: '#3b82f6' },
-    { id: 2, title: 'Modern Resume', color: '#8b5cf6' },
-    { id: 3, title: 'Elegant Resume', color: '#f59e0b' },
-    { id: 4, title: 'Creative Resume', color: '#10b981' },
-  ];
+  const handleStartBuilding = () => {
+    router.push(`/build?template=${templatesList[0].key}`);
+  };
 
   return (
     <View style={styles.container}>
       <AnimatedBackground />
 
-      <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        <Text style={styles.heading}>{language.viewTemplates || 'Choose Your Template'}</Text>
-        <Text style={styles.subHeading}>
-          {language.chooseTemplateSubtext || 'Select a template to get started'}
-        </Text>
+      <Animated.View style={[styles.header, { opacity: fade, transform: [{ translateY: rise }] }]}>
+        <Text style={styles.title}>{heading}</Text>
+        <Text style={styles.subtitle}>{subheading}</Text>
       </Animated.View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.templateGrid}>
-          {templates.map((tpl) => (
-            <Animated.View key={tpl.id} style={[styles.card, { borderColor: tpl.color + '80' }]}>
-              <View style={[styles.cardGlow, { backgroundColor: tpl.color + '20' }]} />
-              <Text style={styles.cardTitle}>{tpl.title}</Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[styles.useButton, { backgroundColor: tpl.color }]}
-                onPress={() => router.push('/build')}
-              >
-                <Text style={styles.useButtonText}>{language.useTemplate || 'Use This Template'}</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
+        <View style={styles.grid}>
+          {templatesList.map((tpl) => {
+            const accent = tpl.accent;
+            return (
+              <Animated.View key={tpl.key} style={[styles.cardWrapper, { transform: [{ scale: cardScale }] }]}>
+                <TouchableOpacity
+                  activeOpacity={0.92}
+                  style={[styles.card, { borderColor: accent + '40' }]}
+                  onPress={() => handleUseTemplate(tpl.key)}
+                >
+                  <View style={[styles.thumb, { backgroundColor: accent + '10' }]}>
+                    {tpl.thumb ? (
+                      <Image source={tpl.thumb} style={styles.thumbImage} resizeMode="cover" />
+                    ) : (
+                      <View style={[styles.thumbPlaceholder, { borderColor: accent + '30' }]}>
+                        <Text style={[styles.thumbText, { color: accent }]}>{tpl.title}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.cardBody}>
+                    <Text style={styles.cardTitle}>{tpl.title}</Text>
+                    <Text style={styles.cardSubtitle}>{tpl.subtitle}</Text>
+
+                    <View style={styles.cardActions}>
+                      <TouchableOpacity
+                        style={[styles.useSmallButton, { backgroundColor: accent }]}
+                        onPress={() => handleUseTemplate(tpl.key)}
+                        activeOpacity={0.9}
+                      >
+                        <Text style={styles.useSmallButtonText}>{t?.useTemplate || 'Use This Template'}</Text>
+                      </TouchableOpacity>
+
+                      <View style={styles.previewDots}>
+                        <View style={[styles.dot, { backgroundColor: accent + '80' }]} />
+                        <View style={[styles.dot, { backgroundColor: 'rgba(255,255,255,0.12)' }]} />
+                        <View style={[styles.dot, { backgroundColor: 'rgba(255,255,255,0.08)' }]} />
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={[styles.cardGlow, { backgroundColor: accent + '14' }]} />
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
         </View>
 
         <TouchableOpacity
-          activeOpacity={0.85}
-          style={styles.startButton}
+          activeOpacity={0.9}
+          style={[styles.primaryCTA, { backgroundColor: selectedLanguage?.accent || '#3b82f6' }]}
           onPress={handleStartBuilding}
         >
-          <Text style={styles.startButtonText}>{language.startBuilding || 'Start Building Now'}</Text>
+          <View style={styles.primaryGlow} />
+          <Text style={styles.primaryCTAText}>{t?.startBuilding || t?.createResume || 'Start Building Now'}</Text>
         </TouchableOpacity>
+
+        <View style={{ height: 56 }} />
       </ScrollView>
     </View>
   );
 };
 
+const CARD_W = Math.min((SCREEN_WIDTH - 64) / 2, 360);
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
-  header: { alignItems: 'center', marginTop: 70, marginBottom: 30 },
-  heading: { fontSize: 30, fontWeight: '700', color: '#fff', textAlign: 'center', marginBottom: 6 },
-  subHeading: { color: 'rgba(255,255,255,0.7)', fontSize: 15, textAlign: 'center', paddingHorizontal: 40 },
-  scrollContainer: { alignItems: 'center', paddingBottom: 80 },
-  templateGrid: {
+  header: { alignItems: 'center', marginTop: 68, marginBottom: 18, paddingHorizontal: 24, zIndex: 20 },
+  title: { color: '#fff', fontSize: 32, fontWeight: '800', textAlign: 'center', letterSpacing: -0.6 },
+  subtitle: { color: 'rgba(255,255,255,0.75)', fontSize: 14.5, textAlign: 'center', marginTop: 8, paddingHorizontal: 14 },
+  scrollContainer: { paddingTop: 8, paddingHorizontal: 20, alignItems: 'center' },
+
+  grid: {
+    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     gap: 16,
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    paddingVertical: 18,
   },
-  card: {
-    width: 160,
-    height: 200,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 20,
-    marginBottom: 20,
-    borderWidth: 1.5,
+
+  cardWrapper: {
+    width: '48%',
+    marginBottom: 18,
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+
+  card: {
+    width: '100%',
+    height: 260,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: 'hidden',
     position: 'relative',
-  },
-  cardGlow: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
-  },
-  cardTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 14,
-    zIndex: 2,
-  },
-  useButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    zIndex: 2,
-  },
-  useButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  startButton: {
-    marginTop: 24,
-    backgroundColor: '#2563eb',
-    paddingVertical: 16,
-    paddingHorizontal: 36,
-    borderRadius: 24,
-    shadowColor: '#2563eb',
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.18,
+    shadowRadius: 30,
     elevation: 8,
   },
-  startButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+
+  thumb: {
+    height: 120,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  thumbImage: {
+    width: '100%',
+    height: '100%',
+  },
+
+  thumbPlaceholder: {
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  thumbText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+
+  cardBody: {
+    flex: 1,
+    padding: 14,
+    justifyContent: 'space-between',
+  },
+
+  cardTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  cardSubtitle: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 13,
+    marginTop: 6,
+  },
+
+  cardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+
+  useSmallButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  useSmallButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+
+  previewDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginLeft: 12,
+  },
+
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 1,
+    elevation: 2,
+  },
+
+  cardGlow: {
+    position: 'absolute',
+    left: -30,
+    bottom: -40,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    opacity: 0.28,
+    zIndex: 0,
+  },
+
+  primaryCTA: {
+    marginTop: 18,
+    width: Math.min(SCREEN_WIDTH - 48, 520),
+    borderRadius: 28,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    elevation: 10,
+  },
+
+  primaryCTAText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 16,
+    zIndex: 2,
+  },
+
+  primaryGlow: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    opacity: 0.06,
+  },
 });
 
 export default TemplateView;
