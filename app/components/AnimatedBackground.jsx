@@ -18,7 +18,7 @@ const AnimatedBackground = () => {
             scale: new Animated.Value(1),
         }));
 
-        // Pulse animation for overlays
+        // Pulse animation 
         Animated.loop(
             Animated.sequence([
                 Animated.timing(pulseAnim, {

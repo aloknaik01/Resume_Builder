@@ -100,12 +100,10 @@ const BuildScreen = () => {
   };
 
   const handleSaveDraft = () => {
-    // Save logic here
     alert(bt.draftSaved || 'Draft saved!');
   };
 
   const handlePreviewDownload = () => {
-    // Preview/Download logic here
     alert(bt.previewReady || 'Preview ready!');
   };
 

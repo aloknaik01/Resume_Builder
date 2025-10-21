@@ -1,15 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import {
-  View,
+  Animated,
+  Dimensions,
+  Modal,
+  ScrollView,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Modal,
-  Dimensions,
-  ScrollView,
+  View,
+  StyleSheet
 } from 'react-native';
-import { router } from 'expo-router';
 import useLanguageStore from './store/languageStore';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -35,34 +35,25 @@ const LanguageSelector = () => {
   const [displayedTitle, setDisplayedTitle] = useState('');
   const [isTyping, setIsTyping] = useState(true);
 
+  // --- Animation  ---
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
-
-  const titleOpacity = useRef(new Animated.Value(1)).current;
+  const titleOpacity = useRef(new Animated.Value(0)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
   const infoOpacity = useRef(new Animated.Value(0)).current;
-
   const modalTitleOpacity = useRef(new Animated.Value(1)).current;
   const modalSubtitleOpacity = useRef(new Animated.Value(1)).current;
 
   const cycleIntervalRef = useRef(null);
 
-  // Load saved language on mount
+  // Load saved language 
   useEffect(() => {
     loadLanguage();
   }, []);
-
-  // Redirect to home if language already confirmed
-  // useEffect(() => {
-  //   if (isLanguageConfirmed && selectedLanguage) {
-  //     // Language already selected, redirect to home
-  //     router.replace('/home');
-  //   }
-  // }, [isLanguageConfirmed, selectedLanguage]);
 
   // Typewriter effect
   useEffect(() => {
@@ -79,17 +70,11 @@ const LanguageSelector = () => {
         clearInterval(typeInterval);
         setIsTyping(false);
 
-        Animated.sequence([
-          Animated.timing(subtitleOpacity, {
-            toValue: 1,
-            duration: 600,
-            useNativeDriver: true,
-          }),
-          Animated.timing(infoOpacity, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-          }),
+        // Fade in subtitle and info
+        Animated.parallel([
+          Animated.timing(subtitleOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
+          Animated.timing(infoOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+          Animated.timing(titleOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
         ]).start();
 
         setTimeout(() => {
@@ -104,78 +89,37 @@ const LanguageSelector = () => {
   // Stop animation when language is confirmed
   useEffect(() => {
     if (isLanguageConfirmed) {
-      if (cycleIntervalRef.current) {
-        clearTimeout(cycleIntervalRef.current);
-      }
+      if (cycleIntervalRef.current) clearTimeout(cycleIntervalRef.current);
 
       setDisplayedTitle(selectedLanguage?.translations?.title || '');
       setIsTyping(false);
 
       Animated.parallel([
-        Animated.timing(titleOpacity, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(subtitleOpacity, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(infoOpacity, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
+        Animated.timing(titleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(subtitleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(infoOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
       ]).start();
     }
   }, [isLanguageConfirmed, selectedLanguage]);
 
-  // Language cycling animation
+  // --- Language cycling animation ---
   const startLanguageCycle = () => {
-    if (isLanguageConfirmed) return;
+    if (isLanguageConfirmed || languages.length <= 1) return;
 
     const cycle = () => {
       Animated.parallel([
-        Animated.timing(titleOpacity, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(subtitleOpacity, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(infoOpacity, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
+        Animated.timing(titleOpacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+        Animated.timing(subtitleOpacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+        Animated.timing(infoOpacity, { toValue: 0, duration: 400, useNativeDriver: true }),
       ]).start(() => {
         const nextIndex = (currentCycleIndex + 1) % languages.length;
         setCycleIndex(nextIndex);
         setDisplayedTitle(languages[nextIndex]?.translations?.title || '');
 
         Animated.parallel([
-          Animated.timing(titleOpacity, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-          Animated.sequence([
-            Animated.timing(subtitleOpacity, {
-              toValue: 1,
-              duration: 600,
-              delay: 200,
-              useNativeDriver: true,
-            }),
-            Animated.timing(infoOpacity, {
-              toValue: 1,
-              duration: 500,
-              useNativeDriver: true,
-            }),
-          ]),
+          Animated.timing(titleOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+          Animated.timing(subtitleOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+          Animated.timing(infoOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
         ]).start(() => {
           if (!isLanguageConfirmed) {
             cycleIntervalRef.current = setTimeout(cycle, 3000);
@@ -191,119 +135,55 @@ const LanguageSelector = () => {
   useEffect(() => {
     if (modalVisible && !isLanguageConfirmed) {
       Animated.parallel([
-        Animated.timing(modalTitleOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(modalSubtitleOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
+        Animated.timing(modalTitleOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(modalSubtitleOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
       ]).start(() => {
         Animated.parallel([
-          Animated.timing(modalTitleOpacity, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(modalSubtitleOpacity, {
-            toValue: 1,
-            duration: 400,
-            delay: 100,
-            useNativeDriver: true,
-          }),
+          Animated.timing(modalTitleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+          Animated.timing(modalSubtitleOpacity, { toValue: 1, duration: 400, delay: 100, useNativeDriver: true }),
         ]).start();
       });
     }
   }, [currentCycleIndex, modalVisible, isLanguageConfirmed]);
 
+  // Background animations
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.05,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 1500, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
       ])
     ).start();
 
     Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 20000,
-        useNativeDriver: true,
-      })
+      Animated.timing(rotateAnim, { toValue: 1, duration: 20000, useNativeDriver: true })
     ).start();
   }, []);
 
+  // Modal open/close animation
   useEffect(() => {
     if (modalVisible) {
       Animated.parallel([
-        Animated.timing(overlayAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 9,
-          tension: 50,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          friction: 9,
-          tension: 50,
-          useNativeDriver: true,
-        }),
+        Animated.timing(overlayAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 9, tension: 50, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(slideAnim, { toValue: 0, friction: 9, tension: 50, useNativeDriver: true }),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(overlayAnim, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.8,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
+        Animated.timing(overlayAnim, { toValue: 0, duration: 250, useNativeDriver: true }),
+        Animated.timing(scaleAnim, { toValue: 0.8, duration: 200, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
       ]).start();
     }
   }, [modalVisible]);
 
-  const handleLanguageSelect = (language) => {
-    setTempLanguage(language);
-  };
+  const handleLanguageSelect = (language) => setTempLanguage(language);
 
-  // ✅ Confirm and navigate to home
   const handleConfirm = async () => {
     await confirmLanguage();
     setModalVisible(false);
-    
-    // Navigate to home screen
-    setTimeout(() => {
-      router.replace('/home');
-    }, 300);
+    setTimeout(() => router.replace('/home'), 300);
   };
 
   const handleClose = () => {
@@ -311,20 +191,12 @@ const LanguageSelector = () => {
     setModalVisible(false);
   };
 
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  const spin = rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
-  const currentLanguage = isLanguageConfirmed
-    ? selectedLanguage
-    : getCurrentCycleLanguage();
-
+  const currentLanguage = isLanguageConfirmed ? selectedLanguage : getCurrentCycleLanguage();
   const displayLanguage = isLanguageConfirmed ? selectedLanguage : tempSelectedLanguage;
 
-  if (!currentLanguage || !displayLanguage) {
-    return null; // Loading state
-  }
+  if (!currentLanguage || !displayLanguage) return null;
 
   return (
     <View style={styles.container}>
@@ -392,10 +264,7 @@ const LanguageSelector = () => {
           <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={handleClose} />
 
           <Animated.View
-            style={[
-              styles.modalContent,
-              { opacity: fadeAnim, transform: [{ scale: scaleAnim }, { translateY: slideAnim }] },
-            ]}
+            style={[styles.modalContent, { opacity: fadeAnim, transform: [{ scale: scaleAnim }, { translateY: slideAnim }] }]}
           >
             <View style={styles.modalHeader}>
               <View style={styles.modalDragIndicator} />
@@ -416,20 +285,13 @@ const LanguageSelector = () => {
                 return (
                   <TouchableOpacity
                     key={language.id}
-                    style={[
-                      styles.languageOption,
-                      isSelected && styles.selectedOption,
-                      isSelected && { borderColor: language.accent + '80' }
-                    ]}
+                    style={[styles.languageOption, isSelected && styles.selectedOption, isSelected && { borderColor: language.accent + '80' }]}
                     activeOpacity={0.7}
                     onPress={() => handleLanguageSelect(language)}
                   >
                     {isSelected && <View style={[styles.selectedGlow, { backgroundColor: language.accent + '10' }]} />}
                     <View style={styles.languageOptionContent}>
-                      <View style={[
-                        styles.flagContainer,
-                        isSelected && { backgroundColor: language.accent + '25', borderColor: language.accent + '40' }
-                      ]}>
+                      <View style={[styles.flagContainer, isSelected && { backgroundColor: language.accent + '25', borderColor: language.accent + '40' }]}>
                         <Text style={styles.flagLarge}>{language.flag}</Text>
                         {isSelected && (
                           <View style={[styles.flagBadge, { backgroundColor: language.accent }]}>
@@ -438,9 +300,7 @@ const LanguageSelector = () => {
                         )}
                       </View>
                       <View style={styles.languageDetails}>
-                        <Text style={[styles.optionName, isSelected && { color: language.accent }]}>
-                          {language.name}
-                        </Text>
+                        <Text style={[styles.optionName, isSelected && { color: language.accent }]}>{language.name}</Text>
                         <Text style={styles.optionNativeName}>{language.nativeName}</Text>
                       </View>
                       {isSelected && (
@@ -458,11 +318,7 @@ const LanguageSelector = () => {
               <TouchableOpacity style={[styles.actionButton, styles.cancelButton]} activeOpacity={0.8} onPress={handleClose}>
                 <Text style={styles.cancelButtonText}>{currentLanguage.translations.cancel}</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.confirmButton, { backgroundColor: tempSelectedLanguage?.accent || '#3b82f6' }]}
-                activeOpacity={0.8}
-                onPress={handleConfirm}
-              >
+              <TouchableOpacity style={[styles.actionButton, styles.confirmButton, { backgroundColor: tempSelectedLanguage?.accent || '#3b82f6' }]} activeOpacity={0.8} onPress={handleConfirm}>
                 <Text style={styles.confirmButtonText}>{currentLanguage.translations.confirm}</Text>
                 <Text style={styles.confirmIcon}>→</Text>
               </TouchableOpacity>
@@ -473,6 +329,10 @@ const LanguageSelector = () => {
     </View>
   );
 };
+
+export default LanguageSelector;
+
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
@@ -538,5 +398,3 @@ const styles = StyleSheet.create({
   confirmButtonText: { color: '#ffffff', fontSize: 16, fontWeight: 'bold', letterSpacing: 0.3, marginRight: 6 },
   confirmIcon: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' },
 });
-
-export default LanguageSelector;

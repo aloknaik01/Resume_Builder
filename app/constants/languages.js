@@ -197,7 +197,7 @@ export const LANGUAGES = [
         feature3Desc: 'गोपनीयता पहले, पूरी तरह से मुफ़्त',
       },
 
-      tranlations: {
+      translations: {
         testimonialHeading: 'कामगार क्या कहते हैं',
         testimonial1: 'इस टूल ने मेरी ज़िंदगी बदल दी! नया रिज़्यूमे इस्तेमाल करने के एक हफ्ते के भीतर मेरी नौकरी लग गई।',
         testimonial1Name: 'राजेश कुमार',
@@ -303,7 +303,7 @@ export const LANGUAGES = [
         feature3Title: 'ସାଇନ୍-ଅପ୍ ନାହିଁ',
         feature3Desc: 'ଗୋପନୀୟତା ପ୍ରଥମେ, ସମ୍ପୂର୍ଣ୍ଣ ମାଗଣା',
       },
-      tranlations: {
+      translations: {
         testimonialHeading: 'କାର୍ଯ୍ୟକର୍ତ୍ତାମାନେ କଣ କହିଛନ୍ତି',
         testimonial1: 'ଏହି ଟୁଲ୍ ମୋ ଜୀବନ ପରିବର୍ତ୍ତନ କରିଦେଲା! ନୂତନ ରିଜ୍ୟୁମେ ବ୍ୟବହାର କରି ଏକ ସପ୍ତାହ ମଧ୍ୟରେ ଚାକିରି ମିଳିଗଲା।',
         testimonial1Name: 'ରାଜେଶ କୁମାର',

@@ -11,7 +11,6 @@ const useLanguageStore = create((set, get) => ({
   isLanguageConfirmed: false,
   isLoading: true,
 
-  // Confirm language
   confirmLanguage: async () => {
     const { tempSelectedLanguage } = get();
     if (tempSelectedLanguage) {
@@ -23,21 +22,17 @@ const useLanguageStore = create((set, get) => ({
     }
   },
 
-  // Temporarily select language
   setTempLanguage: (language) => {
     set({ tempSelectedLanguage: language });
   },
 
-  // Cancel selection
   cancelSelection: () => {
     const { selectedLanguage } = get();
     set({ tempSelectedLanguage: selectedLanguage });
   },
 
-  //  Update index for animation
   setCycleIndex: (index) => set({ currentCycleIndex: index }),
 
-  // Get current cycle language (safe)
   getCurrentCycleLanguage: () => {
     try {
       const { currentCycleIndex } = get();
@@ -49,42 +44,52 @@ const useLanguageStore = create((set, get) => ({
     }
   },
 
-  // Load language from AsyncStorage
+  //  Load language from AsyncStorage
   loadLanguage: async () => {
     try {
       const savedLangId = await AsyncStorage.getItem(STORAGE_KEY);
+
+      //  If user had selected language → no animation
       if (savedLangId && Array.isArray(LANGUAGES)) {
         const language = LANGUAGES.find((lang) => lang.id === savedLangId);
         if (language) {
           set({
             selectedLanguage: language,
             tempSelectedLanguage: language,
-            isLanguageConfirmed: true,
+            isLanguageConfirmed: true, // confirmed user, skip animation
             isLoading: false,
           });
           return;
         }
       }
 
+      //  If no saved language → allow animation
       set({
         selectedLanguage: null,
         tempSelectedLanguage: LANGUAGES?.[0] || null,
-        isLanguageConfirmed: false,
+        isLanguageConfirmed: false, // new user, start animation
         isLoading: false,
       });
     } catch (error) {
       console.error('Error loading language:', error);
-      set({ isLoading: false });
+      set({
+        isLoading: false,
+        isLanguageConfirmed: false,
+      });
     }
   },
 
-  // Get all languages
+  //  Get all languages
   getAllLanguages: () => LANGUAGES || [],
 
   //  Get translations for selected language
   getTranslations: () => {
     const { selectedLanguage } = get();
-    return selectedLanguage?.translations || LANGUAGES?.[0]?.translations || {};
+    return (
+      selectedLanguage?.translations ||
+      LANGUAGES?.[0]?.translations ||
+      {}
+    );
   },
 }));
 

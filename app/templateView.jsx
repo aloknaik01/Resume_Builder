@@ -1,18 +1,18 @@
-import React, { useRef, useEffect } from 'react';
+import { router } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
   Animated,
   Dimensions,
   Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
+import img from '../assets/images/icon.jpg';
 import AnimatedBackground from './components/AnimatedBackground';
 import useLanguageStore from './store/languageStore';
-import img from '../assets/images/icon.png';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
