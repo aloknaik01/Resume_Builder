@@ -11,6 +11,9 @@ import {
   View,
 } from 'react-native';
 import img from '../assets/images/icon.jpg';
+import rnp2 from '../assets/images/rnp2.jpg';
+import rp1 from '../assets/images/rp1.jpg';
+import rp2 from '../assets/images/rp2.jpg';
 import AnimatedBackground from './components/AnimatedBackground';
 import useLanguageStore from './store/languageStore';
 
@@ -29,21 +32,21 @@ const templatesList = [
     title: 'Modern Resume',
     subtitle: 'Bold & contemporary',
     accent: '#8b5cf6',
-    thumb: img,
+    thumb: rnp2,
   },
   {
     key: 'elegant',
     title: 'Elegant Resume',
     subtitle: 'Minimal and refined',
     accent: '#f59e0b',
-    thumb: img,
+    thumb: rp1,
   },
   {
     key: 'creative',
     title: 'Creative Resume',
     subtitle: 'Colorful & unique',
     accent: '#10b981',
-    thumb: img,
+    thumb: rp2,
   },
 ];
 

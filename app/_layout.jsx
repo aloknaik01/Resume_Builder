@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import FloatingLanguageButton from "./components/FloatingLanguageButton";
 
 export default function Layout() {
   return (
@@ -16,6 +17,7 @@ export default function Layout() {
         <Stack.Screen name="home" />
         <Stack.Screen name="build" />
       </Stack>
+      <FloatingLanguageButton />
     </>
   );
 }

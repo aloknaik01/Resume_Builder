@@ -102,6 +102,35 @@ export const LANGUAGES = [
         // Messages
         draftSaved: 'Draft saved successfully!',
         previewReady: 'Preview is ready!',
+
+        // Gender options
+        genderOptions: {
+          male: 'Male / पुरुष / ପୁରୁଷ',
+          female: 'Female / महिला / ମହିଳା',
+          other: 'Other / अन्य / ଅନ୍ୟ',
+          preferNotToSay: 'Prefer not to say / नहीं बताना चाहते / କହିବାକୁ ପସନ୍ଦ କରନ୍ତି ନାହିଁ'
+        },
+
+        // Job Type options
+        jobTypeOptions: {
+          fullTime: 'Full-time / पूर्णकालिक / ପୂର୍ଣ୍ଣକାଳୀନ',
+          partTime: 'Part-time / अंशकालिक / ଅଂଶକାଳୀନ',
+          contract: 'Contract / अनुबंध / ଚୁକ୍ତି',
+          freelance: 'Freelance / स्वतंत्र / ସ୍ୱତନ୍ତ୍ର',
+          internship: 'Internship / इंटर्नशिप / ଇଣ୍ଟର୍ନସିପ୍'
+        },
+
+        // Education Level options
+        educationOptions: {
+          highSchool: 'High School / हाई स्कूल / ହାଇସ୍କୁଲ୍',
+          diploma: 'Diploma / डिप्लोमा / ଡିପ୍ଲୋମା',
+          bachelor: "Bachelor's / स्नातक / ସ୍ନାତକ",
+          master: "Master's / परास्नातक / ସ୍ନାତକୋତ୍ତର",
+          phd: 'PhD / पीएचडी / ପିଏଚଡି',
+          other: 'Other / अन्य / ଅନ୍ୟ'
+        }
+
+
       },
     },
   },

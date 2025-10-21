@@ -1,18 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import { router } from 'expo-router';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   Animated,
-  ScrollView,
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
 import AnimatedBackground from './components/AnimatedBackground.jsx';
+import CustomDropdown from './components/CustomDropdown.jsx';
+import ResumePreviewModal from './components/ResumePreviewModal.jsx'
 import useLanguageStore from './store/languageStore.js';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -21,6 +24,17 @@ const BuildScreen = () => {
   const { getTranslations, selectedLanguage } = useLanguageStore();
   const t = getTranslations();
   const bt = t.build; // Build translations
+  const genderOptions = bt.genderOptions
+    ? Object.values(bt.genderOptions)
+    : ['Male', 'Female', 'Other', 'Prefer not to say'];
+
+  const jobTypeOptions = bt.jobTypeOptions
+    ? Object.values(bt.jobTypeOptions)
+    : ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'];
+
+  const educationOptions = bt.educationOptions
+    ? Object.values(bt.educationOptions)
+    : ['High School', 'Diploma', "Bachelor's", "Master's", 'PhD', 'Other'];
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -38,6 +52,7 @@ const BuildScreen = () => {
     summary: '',
   });
   const [skillInput, setSkillInput] = useState('');
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -104,7 +119,13 @@ const BuildScreen = () => {
   };
 
   const handlePreviewDownload = () => {
-    alert(bt.previewReady || 'Preview ready!');
+
+    if (!formData.fullName || !formData.phone || !formData.email) {
+      alert('Please fill required fields: Full Name, Phone, and Email');
+      return;
+    }
+
+    setShowPreviewModal(true); // Open preview modal
   };
 
   return (
@@ -229,14 +250,26 @@ const BuildScreen = () => {
                     />
                   </View>
 
-                  <View style={[styles.inputGroup, styles.halfWidth]}>
+                  {/* <View style={[styles.inputGroup, styles.halfWidth]}>
                     <Text style={styles.label}>{bt.gender}</Text>
                     <View style={styles.selectContainer}>
                       <Text style={styles.selectText}>
                         {formData.gender || bt.genderPlaceholder}
                       </Text>
                     </View>
+                  </View> */}
+
+                  <View style={[styles.inputGroup, styles.halfWidth]}>
+                    <CustomDropdown
+                      label={bt.gender}
+                      placeholder={bt.genderPlaceholder}
+                      options={genderOptions}
+                      selectedValue={formData.gender}
+                      onSelect={(value) => updateFormData('gender', value)}
+                      accentColor={selectedLanguage?.accent || '#3b82f6'}
+                    />
                   </View>
+
                 </View>
 
                 <View style={styles.row}>
@@ -290,7 +323,7 @@ const BuildScreen = () => {
                   <Text style={styles.stepTitle}>{bt.step2}</Text>
                 </View>
 
-                <View style={styles.inputGroup}>
+                {/* <View style={styles.inputGroup}>
                   <Text style={styles.label}>
                     {bt.jobType} <Text style={styles.required}>*</Text>
                   </Text>
@@ -299,6 +332,18 @@ const BuildScreen = () => {
                       {formData.jobType || bt.jobTypePlaceholder}
                     </Text>
                   </View>
+                </View> */}
+
+                <View style={styles.inputGroup}>
+                  <CustomDropdown
+                    label={bt.jobType}
+                    placeholder={bt.jobTypePlaceholder}
+                    options={jobTypeOptions}
+                    selectedValue={formData.jobType}
+                    onSelect={(value) => updateFormData('jobType', value)}
+                    accentColor={selectedLanguage?.accent || '#3b82f6'}
+                    required
+                  />
                 </View>
 
                 <View style={styles.inputGroup}>
@@ -398,13 +443,23 @@ const BuildScreen = () => {
                   <Text style={styles.stepTitle}>{bt.step4}</Text>
                 </View>
 
-                <View style={styles.inputGroup}>
+                {/* <View style={styles.inputGroup}>
                   <Text style={styles.label}>{bt.educationLevel}</Text>
                   <View style={styles.selectContainer}>
                     <Text style={styles.selectText}>
                       {formData.educationLevel || bt.educationPlaceholder}
                     </Text>
                   </View>
+                </View> */}
+                <View style={styles.inputGroup}>
+                  <CustomDropdown
+                    label={bt.educationLevel}
+                    placeholder={bt.educationPlaceholder}
+                    options={educationOptions}
+                    selectedValue={formData.educationLevel}
+                    onSelect={(value) => updateFormData('educationLevel', value)}
+                    accentColor={selectedLanguage?.accent || '#3b82f6'}
+                  />
                 </View>
 
                 <View style={styles.inputGroup}>
@@ -484,6 +539,12 @@ const BuildScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <ResumePreviewModal
+        visible={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        formData={formData}
+        accentColor={selectedLanguage?.accent || '#3b82f6'}
+      />
     </View>
   );
 };
